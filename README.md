@@ -1,7 +1,9 @@
 play-plovr-plugin
 =================
 
-A Plovr plugin for Play Framework 2.x.  Licensed under the (Apache 2 Software License)[http://www.apache.org/licenses/LICENSE-2.0.html].
+A Plovr plugin for Play Framework 2.x.
+
+Licensed under the (Apache 2 Software License)[http://www.apache.org/licenses/LICENSE-2.0.html].
 
 To use, add the PlayPlovrPlugin.defaultPlovrSettings and set the path to plovrConfiguration and the plovrTargetFile.
 
