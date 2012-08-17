@@ -14,12 +14,4 @@ libraryDependencies += "com.sun.jna" % "jna" % "3.0.9"
 
 publishMavenStyle := false
 
-resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
-
-publishTo <<= (version) { version: String =>
-  val typesafeIvyReleases = Resolver.url("Typesafe Ivy Releases Repository", url("http://repo.typesafe.com/typesafe/ivy-releases/"))(Resolver.ivyStylePatterns) 
-  val typesafeIvySnapshot = Resolver.url("Typesafe Ivy Snapshots Repository", url("http://repo.typesafe.com/typesafe/ivy-snapshots/"))(Resolver.ivyStylePatterns) 
-  val repo =  if (version.trim.endsWith("SNAPSHOT")) typesafeIvySnapshot
-                      else typesafeIvyReleases
-  Some(repo)
-}
+publishTo := Some(Resolver.url("sbt-plugin-releases", new URL("http://scalasbt.artifactoryonline.com/scalasbt/sbt-plugin-releases/"))(Resolver.ivyStylePatterns))
