@@ -15,6 +15,28 @@ import java.nio.channels.{Channels, ReadableByteChannel}
  */
 object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
 
+  lazy val defaultPlovrSettings: Seq[Setting[_]] = Seq(
+      plovrTmpDir := new File("/tmp"),
+      cleanJsSetting,
+      compileJsSetting,
+      startJsDaemonSetting,
+      stopJsDaemonSetting,
+
+      plovrDaemonLog <<= baseDirectory(_ / "logs" / "plovr.log"),
+
+      plovrEntryPoints <<= (sourceDirectory in Compile)(base => ((base / "assets" ** "*.js") --- (base / "assets" ** "_*"))),
+
+      // disable Play's built-in JavaScript compilation
+      PlayProject.javascriptEntryPoints := Seq(),
+
+      // start the plovr daemon whenever compile is invoked
+      compile in Compile <<= (compile in Compile).dependsOn(startJsDaemon),
+
+      // do a compilation to disk when deploying to production
+      // hook into buildRequire because it's the one thing that happens with start, stage, and dist
+      PlayProject.buildRequire <<= PlayProject.buildRequire.dependsOn(compileJs)
+    )
+
   lazy val cleanJsSetting: Setting[Task[Unit]] = cleanJs <<= plovrTargetFile map { file: File =>
     IO.delete(file)
   }
@@ -22,7 +44,7 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
   lazy val compileJsSetting: Setting[Task[Seq[File]]] = compileJs <<= compileJsTask
   lazy val compileJsTask = (plovrConfiguration in compileJs, plovrTmpDir, plovrTargetFile, plovrEntryPoints, streams) map {
     case (configFile: File, plovrTmpDir: File, targetFile: File, jsEntryPoints: PathFinder, s: TaskStreams) => {
-s.log.info("\nCOMPILEING\n");
+
       val jsFiles = jsEntryPoints.get
       val gzTarget = new File(targetFile.getAbsolutePath + ".gz")
 
@@ -105,7 +127,7 @@ s.log.info("\nCOMPILEING\n");
   /** keep track of the plovr daemon process so that it can be stopped later */
   var plovrProcess: Option[Process] = None
 
-  def outputShouldBeFilteredOut(message: String) =
+  private def outputShouldBeFilteredOut(message: String) =
     message.isEmpty ||
       message.contains("org.plovr.Manifest") ||
       message.contains(".DS_Store")
@@ -127,7 +149,7 @@ s.log.info("\nCOMPILEING\n");
 
       if (!alreadyRunning) {
 
-        s.log.info("Starting plovr daemon serving '" + configFile + "' at http://localhost:9810 with logs written to logs/plovr.log")
+        s.log.info("Starting plovr daemon serving '" + configFile + "' at http://localhost:9810 with logs written to " + plovrDaemonLog)
         val plovrJar: File = ensurePlovrJar(plovrTmpDir)
         val command = "java -jar " + plovrJar.getAbsolutePath + " serve " + configFile.getAbsolutePath
 
@@ -164,7 +186,7 @@ s.log.info("\nCOMPILEING\n");
     }
   }
 
-  def ensurePlovrJar(plovrTmpDir: File): File = {
+  private def ensurePlovrJar(plovrTmpDir: File): File = {
     val plovrJar: File = new File(plovrTmpDir, "plovr-4b3caf2b7d84.jar")
     if (plovrJar.exists()) {
       return plovrJar;
@@ -175,21 +197,5 @@ s.log.info("\nCOMPILEING\n");
     fos.getChannel().transferFrom(rbc, 0, 1 << 24);
     plovrJar
   }
-
-
-  lazy val defaultPlovrSettings: Seq[Setting[_]] = Seq(
-      plovrTmpDir := new File("/tmp"),
-      cleanJsSetting,
-      compileJsSetting,
-      startJsDaemonSetting,
-      stopJsDaemonSetting,
-
-      plovrEntryPoints <<= (sourceDirectory in Compile)(base => ((base / "assets" ** "*.js") --- (base / "assets" ** "_*"))),
-
-      // append custom tasks to existing tasks
-      // hook into buildRequire because it's the one thing that happens with start, stage, and dist
-      compile in Compile <<= (compile in Compile).dependsOn(startJsDaemon),
-      PlayProject.buildRequire <<= PlayProject.buildRequire.dependsOn(compileJs)
-    )
 
 }
