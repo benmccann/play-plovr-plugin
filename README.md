@@ -37,3 +37,11 @@ Finally, in your project/Build.scala, add the PlayPlovrPlugin.defaultPlovrSettin
     
       ): _*
     ).dependsOn(dataProject).aggregate(dataProject)
+
+When you run Play in dev mode, you can dynamically compile and load your JavaScript via a server running locally on [port 9810](http://localhost:9810). Or, in production mode, you can load the optimized JavaScript from a compiled static file:
+
+    @if(play.Play.application().isDev()) {
+      <script type="text/javascript" src="http://localhost:9810/compile?id=myPlovrConfig&mode=SIMPLE&pretty-print=true"></script>
+    } else {
+      <script type="text/javascript" src="@routes.Assets.at("javascripts/compiled.js")"></script>
+    }
