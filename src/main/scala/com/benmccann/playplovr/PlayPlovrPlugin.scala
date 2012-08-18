@@ -22,8 +22,6 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
       startJsDaemonSetting,
       stopJsDaemonSetting,
 
-      plovrDaemonLog <<= baseDirectory(_ / "logs" / "plovr.log"),
-
       plovrEntryPoints <<= (sourceDirectory in Compile)(base => ((base / "assets" ** "*.js") --- (base / "assets" ** "_*"))),
 
       // disable Play's built-in JavaScript compilation
@@ -132,8 +130,8 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
       message.contains("org.plovr.Manifest") ||
       message.contains(".DS_Store")
 
-  lazy val startJsDaemonSetting: Setting[Task[Unit]] = startJsDaemon <<= (plovrConfiguration in startJsDaemon, plovrTmpDir, plovrDaemonLog, streams) map {
-    case (configFile: File, plovrTmpDir: File, logFile: File, s: TaskStreams) => {
+  lazy val startJsDaemonSetting: Setting[Task[Unit]] = startJsDaemon <<= (plovrConfiguration in startJsDaemon, plovrTmpDir, streams) map {
+    case (configFile: File, plovrTmpDir: File, s: TaskStreams) => {
 
       // check if daemon is running already
       import java.net.Socket
@@ -149,7 +147,7 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
 
       if (!alreadyRunning) {
 
-        s.log.info("Starting plovr daemon serving '" + configFile + "' at http://localhost:9810 with logs written to " + plovrDaemonLog)
+        s.log.info("Starting plovr daemon serving '" + configFile + "' at http://localhost:9810")
         val plovrJar: File = ensurePlovrJar(plovrTmpDir)
         val command = "java -jar " + plovrJar.getAbsolutePath + " serve " + configFile.getAbsolutePath
 
