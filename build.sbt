@@ -4,7 +4,7 @@ sbtPlugin := true
 
 name := "play-plovr-plugin"
 
-version := "0.1"
+version := "0.2-SNAPSHOT"
 
 organization := "com.benmccann"
 
