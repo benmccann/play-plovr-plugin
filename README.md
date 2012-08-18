@@ -1,7 +1,7 @@
 Play Plovr plugin
 =================
 
-A [Plovr](http://plovr.com/) plugin for [Play Framework 2.x](https://github.com/playframework/Play20/).
+A [Plovr](http://plovr.com/) plugin for [Play Framework 2.1](https://github.com/playframework/Play20/).
 
 Licensed under the [Apache 2 Software License](http://www.apache.org/licenses/LICENSE-2.0.html).
 
