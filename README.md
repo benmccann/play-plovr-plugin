@@ -11,7 +11,7 @@ To use, create a [plovr configuration file](http://plovr.com/docs.html).
 
 Then, in your project/plugins.sbt, add the plug-in:
 
-    addSbtPlugin("com.benmccann" % "play-plovr-plugin" % "0.1")
+    addSbtPlugin("com.benmccann" % "play-plovr-plugin" % "0.2")
 
 Finally, in your project/Build.scala, add the PlayPlovrPlugin.defaultPlovrSettings and set the path to plovrConfiguration and the plovrTargetFile:
 
