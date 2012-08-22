@@ -32,6 +32,7 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
 
       // do a compilation to disk when deploying to production
       // hook into buildRequire because it's the one thing that happens with start, stage, and dist
+      resourceGenerators in Compile <+= compileJsTask,
       PlayProject.buildRequire <<= PlayProject.buildRequire.dependsOn(compileJs)
     )
 
