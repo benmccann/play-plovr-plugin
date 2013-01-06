@@ -8,7 +8,9 @@ version := "0.3-SNAPSHOT"
 
 organization := "com.benmccann"
 
-addSbtPlugin("play" % "sbt-plugin" % "2.1-08072012" % "provided")
+scalacOptions += "-deprecation"
+
+addSbtPlugin("play" % "sbt-plugin" % "2.1-RC1" % "provided")
 
 libraryDependencies += "com.sun.jna" % "jna" % "3.0.9"
 
