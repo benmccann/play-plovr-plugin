@@ -25,7 +25,7 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
       plovrEntryPoints <<= (sourceDirectory in Compile)(base => ((base / "assets" ** "*.js") --- (base / "assets" ** "_*"))),
 
       // disable Play's built-in JavaScript compilation
-      PlayProject.javascriptEntryPoints := Seq(),
+      play.Project.javascriptEntryPoints := Seq(),
 
       // start the plovr daemon whenever compile is invoked
       compile in Compile <<= (compile in Compile).dependsOn(startJsDaemon),
@@ -33,7 +33,7 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
       // do a compilation to disk when deploying to production
       // hook into buildRequire because it's the one thing that happens with start, stage, and dist
       resourceGenerators in Compile <+= compileJsTask,
-      PlayProject.buildRequire <<= PlayProject.buildRequire.dependsOn(compileJs)
+      play.Project.buildRequire <<= play.Project.buildRequire.dependsOn(compileJs)
     )
 
   lazy val cleanJsSetting: Setting[Task[Unit]] = cleanJs <<= plovrTargetFile map { file: File =>
