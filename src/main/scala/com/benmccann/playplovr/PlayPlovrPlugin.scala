@@ -32,19 +32,21 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
 
       // do a compilation to disk when deploying to production
       // hook into buildRequire because it's the one thing that happens with start, stage, and dist
-      resourceGenerators in Compile <+= compileJsTask,
       play.Project.buildRequire <<= play.Project.buildRequire.dependsOn(compileJs)
     )
 
-  lazy val cleanJsSetting: Setting[Task[Unit]] = cleanJs <<= plovrTargetFile map { file: File =>
-    IO.delete(file)
+  lazy val cleanJsSetting: Setting[Task[Unit]] = cleanJs <<= (plovrTargetPath, classDirectory in Compile) map {
+    case (target: String, classes: File) => {
+      IO.delete(new File(classes, target))
+    }
   }
 
   lazy val compileJsSetting: Setting[Task[Seq[File]]] = compileJs <<= compileJsTask
-  lazy val compileJsTask = (plovrConfiguration in compileJs, plovrTmpDir, plovrTargetFile, plovrEntryPoints, streams) map {
-    case (configFile: File, plovrTmpDir: File, targetFile: File, jsEntryPoints: PathFinder, s: TaskStreams) => {
+  lazy val compileJsTask = (plovrConfiguration in compileJs, plovrTmpDir, plovrTargetPath, plovrEntryPoints, classDirectory in Compile, streams) map {
+    case (configFile: File, plovrTmpDir: File, target: String, jsEntryPoints: PathFinder, classes: File, s: TaskStreams) => {
 
       val jsFiles = jsEntryPoints.get
+      val targetFile = new File(classes, target)
       val gzTarget = new File(targetFile.getAbsolutePath + ".gz")
 
       val newest = jsFiles.maxBy(_.lastModified)

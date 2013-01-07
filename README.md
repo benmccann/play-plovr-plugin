@@ -18,12 +18,11 @@ Finally, in your project/Build.scala, add the PlayPlovrPlugin.defaultPlovrSettin
     import com.benmccann.playplovr.PlayPlovrPlugin
     import com.benmccann.playplovr.PlayPlovrPlugin._
     
-    val main = PlayProject(
+    val main = play.Project(
       appName,
       appVersion,
       frontendDeps,
-      file("frontend"),
-      JAVA).settings(PlayPlovrPlugin.defaultPlovrSettings ++ Seq(
+      file("frontend")).settings(PlayPlovrPlugin.defaultPlovrSettings ++ Seq(
     
         // my Play custom settings
     
@@ -33,10 +32,10 @@ Finally, in your project/Build.scala, add the PlayPlovrPlugin.defaultPlovrSettin
     
         // project-specific plovr settings
         plovrConfiguration <<= baseDirectory(_ / "plovr" /  "plovr.json"),
-        plovrTargetFile <<= (resourceManaged)(_ / "main" / "public" / "javascripts" / "compiled.js")
+        plovrTargetPath := "public/javascripts/compiled.js"
     
       ): _*
-    ).dependsOn(dataProject).aggregate(dataProject)
+    )
 
 When you run Play in dev mode, you can dynamically compile and load your JavaScript via a server running locally on [port 9810](http://localhost:9810). Or, in production mode, you can load the optimized JavaScript from a compiled static file:
 
