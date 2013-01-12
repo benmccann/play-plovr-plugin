@@ -89,7 +89,7 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
 
   private def plovrCompile(plovrTmpDir: File, targetFile: File, configFile: File, s: TaskStreams): Either[Seq[String], Seq[String]] = {
     targetFile.createNewFile()
-    val plovrJar: File = ensurePlovrJar(plovrTmpDir)
+    val plovrJar: File = ensurePlovrJar(plovrTmpDir, s)
     val command = "java -jar " + plovrJar.getAbsolutePath + " build " + configFile.getAbsolutePath
     s.log.debug("Plovr compile command: " + command)
 
@@ -151,7 +151,7 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
       if (!alreadyRunning) {
 
         s.log.info("Starting plovr daemon serving '" + configFile + "' at http://localhost:9810")
-        val plovrJar: File = ensurePlovrJar(plovrTmpDir)
+        val plovrJar: File = ensurePlovrJar(plovrTmpDir, s)
         val command = "java -jar " + plovrJar.getAbsolutePath + " serve " + configFile.getAbsolutePath
 
         val daemonOutputLogger = new sbt.ProcessLogger {
@@ -187,14 +187,19 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
     }
   }
 
-  private def ensurePlovrJar(plovrTmpDir: File): File = {
+  private def ensurePlovrJar(plovrTmpDir: File, s: TaskStreams): File = {
+    import scala.sys.process._
+
     val plovrRelease = "plovr-eba786b34df9.jar"
     val plovrJar: File = new File(plovrTmpDir, plovrRelease)
     if (plovrJar.exists()) {
       return plovrJar;
     }
     val url: URL = new URL("http://plovr.googlecode.com/files/" + plovrRelease);
-    url #> plovrJar
+    val rbc: ReadableByteChannel = Channels.newChannel(url.openStream());
+    val fos: FileOutputStream = new FileOutputStream(plovrJar);
+    fos.getChannel().transferFrom(rbc, 0, java.lang.Long.MAX_VALUE);
+    s.log.info("Downloaded " + url + " to " + plovrJar);
     plovrJar
   }
 
