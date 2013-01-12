@@ -188,8 +188,6 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
   }
 
   private def ensurePlovrJar(plovrTmpDir: File, s: TaskStreams): File = {
-    import scala.sys.process._
-
     val plovrRelease = "plovr-eba786b34df9.jar"
     val plovrJar: File = new File(plovrTmpDir, plovrRelease)
     if (plovrJar.exists()) {
