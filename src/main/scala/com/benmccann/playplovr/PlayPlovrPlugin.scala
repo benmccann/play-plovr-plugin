@@ -193,10 +193,8 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
     if (plovrJar.exists()) {
       return plovrJar;
     }
-    val website: URL = new URL("http://plovr.googlecode.com/files/" + plovrRelease);
-    val rbc: ReadableByteChannel = Channels.newChannel(website.openStream());
-    val fos: FileOutputStream = new FileOutputStream(plovrJar);
-    fos.getChannel().transferFrom(rbc, 0, 1 << 24);
+    val url: URL = new URL("http://plovr.googlecode.com/files/" + plovrRelease);
+    url #> plovrJar
     plovrJar
   }
 
