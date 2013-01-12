@@ -188,11 +188,12 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
   }
 
   private def ensurePlovrJar(plovrTmpDir: File): File = {
-    val plovrJar: File = new File(plovrTmpDir, "plovr-4b3caf2b7d84.jar")
+    val plovrRelease = "plovr-eba786b34df9.jar"
+    val plovrJar: File = new File(plovrTmpDir, plovrRelease)
     if (plovrJar.exists()) {
       return plovrJar;
     }
-    val website: URL = new URL("http://plovr.googlecode.com/files/plovr-eba786b34df9.jar");
+    val website: URL = new URL("http://plovr.googlecode.com/files/" + plovrRelease);
     val rbc: ReadableByteChannel = Channels.newChannel(website.openStream());
     val fos: FileOutputStream = new FileOutputStream(plovrJar);
     fos.getChannel().transferFrom(rbc, 0, 1 << 24);
