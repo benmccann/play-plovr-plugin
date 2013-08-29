@@ -144,7 +144,7 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
           socket.close();
           true
         } catch {
-          case _ => false
+          case _ : Throwable => false
         }
 
 
@@ -188,7 +188,7 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
   }
 
   private def ensurePlovrJar(plovrTmpDir: File, s: TaskStreams): File = {
-    val plovrRelease = "plovr-eba786b34df9.jar"
+    val plovrRelease = "plovr-81ed862.jar"
     val plovrJar: File = new File(plovrTmpDir, plovrRelease)
     if (plovrJar.exists()) {
       return plovrJar;
