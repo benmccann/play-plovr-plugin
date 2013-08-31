@@ -80,6 +80,7 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
       }
 
       if (targetFile.length == 0) {
+        IO.delete(targetFile)
         throw new RuntimeException("JavaScript compilation failed")
       }
 
