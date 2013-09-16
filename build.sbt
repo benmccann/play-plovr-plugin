@@ -4,7 +4,7 @@ sbtPlugin := true
 
 name := "play-plovr-plugin"
 
-version := "0.4-SNAPSHOT"
+version := "0.4"
 
 organization := "com.benmccann"
 
@@ -12,10 +12,10 @@ scalacOptions += "-deprecation"
 
 resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
 
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.2.0-RC1" % "provided")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.2.0-RC2" % "provided")
 
 libraryDependencies += "com.sun.jna" % "jna" % "3.0.9"
 
-publishMavenStyle := false
+publishTo := Some(Resolver.url("sbt-plugin-releases", new URL("http://repo.scala-sbt.org/scalasbt/sbt-plugin-releases/"))(Resolver.ivyStylePatterns))
 
-publishTo := Some(Resolver.url("sbt-plugin-releases", new URL("http://scalasbt.artifactoryonline.com/scalasbt/sbt-plugin-releases/"))(Resolver.ivyStylePatterns))
+publishMavenStyle := false
