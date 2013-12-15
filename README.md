@@ -11,7 +11,7 @@ To use, create a [plovr configuration file](http://plovr.com/docs.html).
 
 Then, in your project/plugins.sbt, add the plug-in:
 
-    addSbtPlugin("com.benmccann" % "play-plovr-plugin" % "0.4.0")
+    addSbtPlugin("com.benmccann" % "play-plovr-plugin" % "0.4")
 
 The latest version works with Play 2.2. The last version tested with Play 2.1 was 0.3.4.
 
