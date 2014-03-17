@@ -33,8 +33,9 @@ Finally, in your project/Build.scala, add the PlayPlovrPlugin.defaultPlovrSettin
         .
     
         // project-specific plovr settings
-        plovrConfiguration <<= baseDirectory(_ / "plovr" /  "plovr.json"),
-        plovrTargetPath := "public/javascripts/compiled.js"
+        plovrTargets <<= baseDirectory { base => Seq(
+          base / "plovr" /  "plovr.json" -> "public/javascripts/compiled.js"
+        )
     
       ): _*
     )
