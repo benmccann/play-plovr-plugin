@@ -62,25 +62,23 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
             targetFile.getParentFile.mkdirs()
           }
 
-          if (!targetFile.exists || (targetFile.exists && targetFile.lastModified <= newest.lastModified)) {
+          if (!targetFile.exists || targetFile.lastModified <= newest.lastModified) {
             IO.delete(targetFile)
 
             s.log.debug("Using plovr configuration file '" + configFile + "'")
             s.log.info("Compiling " + jsFiles.size + " Javascript sources to " + targetFile.getAbsolutePath)
 
-            plovrCompile(plovrTmpDir, targetFile, configFile, s) match {
-
+            plovrCompile(plovrTmpDir, targetFile, configFile, s) fold (
               // failure
-              case Left(output) => {
+              output => {
                 throw new RuntimeException(output.reverse.mkString("\n"))
-              }
-
+              },
               // success
-              case Right(_) => {
+              _ => {
                 IO.gzip(targetFile, gzTarget)
                 s.log.info("Javascript compiled, total size: " + targetFile.length / 1000 + " k, gz: " + gzTarget.length / 1000 + " k")
               }
-            }
+            )
 
           }
 
@@ -101,8 +99,8 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
     val command = "java -jar " + plovrJar.getAbsolutePath + " build " + configFile.getAbsolutePath
     s.log.debug("Plovr compile command: " + command)
 
-    var success = true;
-    var compilerOutput = ArrayBuffer[String]()
+    var success = true
+    val compilerOutput = ArrayBuffer[String]()
     object outputLogger extends sbt.ProcessLogger {
       // stdout is piped to file
       def info(message: => String) { output(message) }
@@ -112,7 +110,7 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
 
       def output(message: String) {
         if (message.startsWith("BUILD FAILED")) {
-          success = false;
+          success = false
         }
 
         if (!outputShouldBeFilteredOut(message)) {
@@ -126,10 +124,10 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
     command #> targetFile ! outputLogger
 
     if (success) {
-      Right(compilerOutput.toSeq)
+      Right(compilerOutput)
     } else {
       IO.delete(targetFile)
-      Left(compilerOutput.toSeq)
+      Left(compilerOutput)
     }
   }
 
@@ -148,8 +146,8 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
       import java.net.Socket
       val alreadyRunning =
         try {
-          val socket = new Socket("127.0.0.1", 9810);
-          socket.close();
+          val socket = new Socket("127.0.0.1", 9810)
+          socket.close()
           true
         } catch {
           case _ : Throwable => false
@@ -183,30 +181,26 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
     }
   }
 
-  lazy val stopJsDaemonSetting: Setting[Task[Unit]] = stopJsDaemon <<= streams map {
-    case (s: TaskStreams) => {
-      plovrProcess match {
-        case Some(process: Process) => {
-          s.log.info("Shutting down plovr daemon")
-          process.destroy()
-          plovrProcess = None
-        }
-        case None => s.log.info("Plovr daemon not running")
-      }
+  lazy val stopJsDaemonSetting: Setting[Task[Unit]] = stopJsDaemon <<= streams map { s =>
+    plovrProcess map { process =>
+      s.log.info("Shutting down plovr daemon")
+      process.destroy()
+      plovrProcess = None
+    } getOrElse {
+      s.log.info("Plovr daemon not running")
     }
   }
 
   private def ensurePlovrJar(plovrTmpDir: File, s: TaskStreams): File = {
     val plovrRelease = "plovr-81ed862.jar"
-    val plovrJar: File = new File(plovrTmpDir, plovrRelease)
-    if (plovrJar.exists()) {
-      return plovrJar;
+    val plovrJar = new File(plovrTmpDir, plovrRelease)
+    if (!plovrJar.exists()) {
+      val url: URL = new URL("http://plovr.googlecode.com/files/" + plovrRelease)
+      val rbc: ReadableByteChannel = Channels.newChannel(url.openStream())
+      val fos: FileOutputStream = new FileOutputStream(plovrJar)
+      fos.getChannel().transferFrom(rbc, 0, java.lang.Long.MAX_VALUE)
+      s.log.info("Downloaded " + url + " to " + plovrJar)
     }
-    val url: URL = new URL("http://plovr.googlecode.com/files/" + plovrRelease);
-    val rbc: ReadableByteChannel = Channels.newChannel(url.openStream());
-    val fos: FileOutputStream = new FileOutputStream(plovrJar);
-    fos.getChannel().transferFrom(rbc, 0, java.lang.Long.MAX_VALUE);
-    s.log.info("Downloaded " + url + " to " + plovrJar);
     plovrJar
   }
 
