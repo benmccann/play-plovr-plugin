@@ -1,11 +1,11 @@
-Play Plovr plugin
+SBT Plovr
 =================
 
-A [Plovr](http://plovr.com/) plugin for [Play Framework 2.x](https://github.com/playframework/Play20/).
+A [Plovr](http://plovr.com/) plugin for [sbt-web](https://github.com/sbt/sbt-web) (and hence Play Framework 2.3+).
 
 Licensed under the [Apache 2 Software License](http://www.apache.org/licenses/LICENSE-2.0.html).
 
-This plugin allows you to easily use Google's [Closure Compiler](https://developers.google.com/closure/compiler/) and [Closure Library](http://closure-library.googlecode.com/svn/docs/index.html) with Play 2. The Closure Compiler support which ships with Play 2 does not allow for easy use of the Closure Library.
+This plugin allows you to easily use Google's [Closure Compiler](https://developers.google.com/closure/compiler/) and [Closure Library](http://closure-library.googlecode.com/svn/docs/index.html) with projects using SBT web (e.g. Play 2.3+).
 
 To use, create a [plovr configuration file](http://plovr.com/docs.html).
 
@@ -13,29 +13,20 @@ Then, in your project/plugins.sbt, add the plug-in:
 
     addSbtPlugin("com.benmccann" % "play-plovr-plugin" % "0.5")
 
-The latest version works with Play 2.2. The last version tested with Play 2.1 was 0.3.4.
-
 Finally, in your project/Build.scala, add the PlayPlovrPlugin.defaultPlovrSettings and set the path to plovrConfiguration and the plovrTargetFile:
 
-    import com.benmccann.playplovr.PlayPlovrPlugin
-    import com.benmccann.playplovr.PlayPlovrPlugin._
+    import com.benmccann.playplovr.PlayPlovrPlugin.autoImport._
     
-    val main = play.Project(
-      appName,
-      appVersion,
-      frontendDeps,
-      file("frontend")).settings(PlayPlovrPlugin.defaultPlovrSettings ++ Seq(
-    
-        // my Play custom settings
-    
-        .
-        .
-        .
+    val main = Project(
+        appName,
+        file("frontend"))
+      .enablePlugins(play.PlayJava, SbtWeb)
+      .settings(Seq(
     
         // project-specific plovr settings
-        plovrTargets <<= baseDirectory { base => Seq(
+        plovrTargets in Assets <<= baseDirectory { base => Seq(
           base / "plovr" /  "plovr.json" -> "public/javascripts/compiled.js"
-        )
+        )}
     
       ): _*
     )

@@ -2,17 +2,17 @@ import sbt.Defaults._
 
 sbtPlugin := true
 
+organization := "com.benmccann"
+
 name := "play-plovr-plugin"
 
-version := "0.5"
-
-organization := "com.benmccann"
+version := "0.6-SNAPSHOT"
 
 scalacOptions += "-deprecation"
 
 resolvers += "Typesafe repository" at "http://repo.typesafe.com/typesafe/releases/"
 
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.2.2" % "provided")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.3.0" % "provided")
 
 libraryDependencies += "com.sun.jna" % "jna" % "3.0.9"
 
