@@ -21,6 +21,7 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
       compileJsSetting,
       startJsDaemonSetting,
       stopJsDaemonSetting,
+      plovrServicePort := 9810,
 
       plovrEntryPoints <<= (sourceDirectory in Compile)(base => ((base / "assets" ** "*.js") --- (base / "assets" ** "_*"))),
 
@@ -139,14 +140,14 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
       message.contains("org.plovr.Manifest") ||
       message.contains(".DS_Store")
 
-  lazy val startJsDaemonSetting: Setting[Task[Unit]] = startJsDaemon <<= (plovrTargets, plovrTmpDir, streams) map {
-    case (targets: Seq[(File,String)], plovrTmpDir: File, s: TaskStreams) => {
+  lazy val startJsDaemonSetting: Setting[Task[Unit]] = startJsDaemon <<= (plovrTargets, plovrTmpDir, plovrServicePort, streams) map {
+    case (targets: Seq[(File,String)], plovrTmpDir: File, port: Int, s: TaskStreams) => {
 
       // check if daemon is running already
       import java.net.Socket
       val alreadyRunning =
         try {
-          val socket = new Socket("127.0.0.1", 9810)
+          val socket = new Socket("127.0.0.1", port)
           socket.close()
           true
         } catch {
@@ -157,9 +158,10 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
       if (!alreadyRunning) {
 
         val targetFiles = targets.map(_._1)
-        s.log.info("Starting plovr daemon serving '" + targetFiles.mkString(" ") + "' at http://localhost:9810")
+        s.log.info("Starting plovr daemon serving '" + targetFiles.mkString(" ") + "' at http://localhost:" + port)
         val plovrJar: File = ensurePlovrJar(plovrTmpDir, s)
-        val command = "java -jar " + plovrJar.getAbsolutePath + " serve " + targetFiles.map(_.getAbsolutePath).mkString(" ") // TODO: properly escape
+        val portCommand: String = "-p " + port + " "
+        val command = "java -jar " + plovrJar.getAbsolutePath + " serve " + portCommand + targetFiles.map(_.getAbsolutePath).mkString(" ") // TODO: properly escape
 
         val daemonOutputLogger = new sbt.ProcessLogger {
           def error(message: => String) {
