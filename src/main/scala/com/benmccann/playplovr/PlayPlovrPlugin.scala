@@ -96,7 +96,7 @@ object PlayPlovrPlugin extends Plugin with PlayPlovrKeys {
   private def plovrCompile(plovrTmpDir: File, targetFile: File, configFile: File, s: TaskStreams): Either[Seq[String], Seq[String]] = {
     targetFile.createNewFile()
     val plovrJar: File = ensurePlovrJar(plovrTmpDir, s)
-    val command = "java -jar " + plovrJar.getAbsolutePath + " build " + configFile.getAbsolutePath
+    val command = "java -Dfile.encoding=UTF8 -jar " + plovrJar.getAbsolutePath + " build " + configFile.getAbsolutePath
     s.log.debug("Plovr compile command: " + command)
 
     var success = true
